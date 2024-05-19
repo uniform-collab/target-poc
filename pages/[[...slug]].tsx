@@ -6,14 +6,9 @@ import {
   ComponentInstance,
   walkNodeTree,
 } from "@uniformdev/canvas";
-import {
-  getCompositionsForNavigation,
-  getPattern,
-} from "@/lib/uniform/canvasClient";
+import { getPattern } from "@/lib/uniform/canvasClient";
 
-// IMPORTANT: this starter is using SSR mode by default for simplicity. SSG mode can be enabled, please check Uniform docs here: https://docs.uniform.app/docs/guides/composition/routing#project-map-with-uniform-get-server-side-props-and-with-uniform-get-static-props
 export const getServerSideProps = withUniformGetServerSideProps({
-  // fetching draft composition in dev mode for convenience
   requestOptions: {
     state:
       process.env.NODE_ENV === "development"
@@ -26,7 +21,6 @@ export const getServerSideProps = withUniformGetServerSideProps({
     _defaultHandler
   ) => {
     const { composition } = compositionApiResponse || {};
-
     // get all mboxes from the composition
     const mboxes: string[] = [];
     walkNodeTree(composition, (node) => {
@@ -37,8 +31,6 @@ export const getServerSideProps = withUniformGetServerSideProps({
         }
       }
     });
-
-    console.log({ mboxes });
 
     const decisions = await Promise.all(
       mboxes.map(async (mbox) => {
@@ -52,19 +44,18 @@ export const getServerSideProps = withUniformGetServerSideProps({
       })
     );
 
-    // console.log(JSON.stringify(decisions, null, 2));
-
-    walkNodeTree(composition, (node) => {
-      if (node.type === "component" && node.node.type === "targetContainer") {
-        const mbox = node.node.parameters?.mbox?.value as string;
+    walkNodeTree(composition, ({ node: component, actions }) => {
+      if (component.type === "targetContainer") {
+        // @ts-ignore
+        const mbox = component.parameters?.mbox?.value as string;
         if (mbox) {
           const decision = decisions.find((d) => d.mbox === mbox);
-          console.log({ patternToInject: decision.data });
+          const newComponent: ComponentInstance = decision.data;
+          // @ts-ignore
+          actions.replace(newComponent);
         }
       }
     });
-
-    //console.log(JSON.stringify(composition, null, 2));
 
     return {
       props: {

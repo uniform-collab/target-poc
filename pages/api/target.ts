@@ -9,7 +9,6 @@ export default function handler(
   res: NextApiResponse<ResponseData>
 ) {
   const { mbox } = req.query;
-  console.log("mbox", mbox);
   if (mbox && Object.keys(mockTargetResponseData).includes(mbox as string)) {
     const patternId = mockTargetResponseData[mbox as string];
     res.status(200).json({ patternId });

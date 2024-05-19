@@ -1,9 +1,7 @@
-import { RichTextParamValue } from "@uniformdev/canvas";
-import { UniformRichText } from "@uniformdev/canvas-next";
 import {
   registerUniformComponent,
   ComponentProps,
-  UniformText,
+  useUniformContextualEditingState,
 } from "@uniformdev/canvas-react";
 
 type TargetContainerProps = ComponentProps<{
@@ -11,7 +9,12 @@ type TargetContainerProps = ComponentProps<{
 }>;
 
 const TargetContainer: React.FC<TargetContainerProps> = () => {
-  return null;
+  const { previewMode } = useUniformContextualEditingState();
+  const isContextualEditing = previewMode === "editor";
+
+  return isContextualEditing ? (
+    <h1>Adobe Target decision will be rendered here</h1>
+  ) : null;
 };
 
 registerUniformComponent({
